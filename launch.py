@@ -150,6 +150,9 @@ def prepare_enviroment():
     if not is_installed("pyngrok") and ngrok:
         run_pip("install pyngrok", "ngrok")
 
+    if not is_installed('flask'):
+        run_pip('install flask', 'flask')
+
     os.makedirs(dir_repos, exist_ok=True)
 
     git_clone(stable_diffusion_repo, repo_dir('stable-diffusion'), "Stable Diffusion", stable_diffusion_commit_hash)
@@ -175,7 +178,11 @@ def start_webui():
     import webui
     webui.webui()
 
+def start_api():
+    import webapi
+    webapi.init()
 
 if __name__ == "__main__":
     prepare_enviroment()
-    start_webui()
+    start_api()
+    

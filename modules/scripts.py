@@ -148,6 +148,8 @@ class ScriptRunner:
         return inputs
 
     def run(self, p: StableDiffusionProcessing, *args):
+        print(args[0])
+
         script_index = args[0]
 
         if script_index == 0:
