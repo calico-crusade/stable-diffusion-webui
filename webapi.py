@@ -7,6 +7,8 @@ import importlib
 import signal
 import threading
 
+from PIL import Image
+
 from fastapi.middleware.gzip import GZipMiddleware
 
 from modules.paths import script_path
@@ -112,6 +114,101 @@ def txt2img():
         'info': info,
         'images': base64Images,
         'html': html
+    })
+
+@app.route('/img2img', methods=['POST'])
+def img2img():
+    data = json.loads(request.data)
+
+    image_base64 = data['image']
+    bytes_from_bas64 = base64.b64decode(image_base64)
+    img = Image.open(BytesIO(bytes_from_bas64))
+
+    mode = 0
+    img2img_prompt = data['prompt']
+    img2img_negative_prompt = data['negativePrompt']
+    img2img_prompt_style = 'None'
+    img2img_prompt_style2 = 'None'
+    init_img = img
+    init_img_with_mask = None
+    init_img_inpaint = None
+    init_mask_inpaint = None
+    mask_mode = 0
+    steps = data['steps']
+    sampler_index = 0
+    mask_blur = 0
+    inpainting_fill = None
+    restore_faces = False
+    tiling = False
+    batch_count = data['batchCount']
+    batch_size = data['batchSize']
+    cfg_scale = data['cfgScale']
+    denoising_strength = data['denoiseStrength']
+    seed = data['seed']
+    subseed = -1
+    subseed_strength = 0
+    seed_resize_from_h = 0
+    seed_resize_from_w = 0
+    seed_checkbox = False
+    height = data['height']
+    width = data['width']
+    resize_mode = 0
+    inpaint_full_res = False
+    inpaint_full_res_padding = 0
+    inpainting_mask_invert = 0
+    img2img_batch_input_dir = None
+    img2img_batch_output_dir = None
+    args = [0, False, False, '', 'Seed', '', 'Nothing', '', True, False, False, None, '', '']
+
+    res = modules.img2img.img2img(
+        mode,
+        img2img_prompt,
+        img2img_negative_prompt,
+        img2img_prompt_style,
+        img2img_prompt_style2,
+        init_img,
+        init_img_with_mask,
+        init_img_inpaint,
+        init_mask_inpaint,
+        mask_mode,
+        steps,
+        sampler_index,
+        mask_blur,
+        inpainting_fill,
+        restore_faces,
+        tiling,
+        batch_count,
+        batch_size,
+        cfg_scale,
+        denoising_strength,
+        seed,
+        subseed, subseed_strength, seed_resize_from_h, seed_resize_from_w, seed_checkbox,
+        height,
+        width,
+        resize_mode,
+        inpaint_full_res,
+        inpaint_full_res_padding,
+        inpainting_mask_invert,
+        img2img_batch_input_dir,
+        img2img_batch_output_dir,
+        *args
+    )
+
+    (images, info, html) = res
+
+    base64Images = [imageToBytes(x) for x in images]
+
+    return jsonify({
+        'info': info,
+        'images': base64Images,
+        'html': html
+    })
+
+@app.route('/embeddings', methods=['GET'])
+def embeddings():
+    items = os.listdir('./embeddings')
+    return jsonify({
+        'embeddings': items
     })
 
 
